@@ -222,7 +222,6 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-chart-bar"></i> Expense Statistics</h1>
-            <p>Track your spending patterns and averages</p>
         </header>
 
         <div class="nav-buttons">
@@ -245,6 +244,14 @@
                 <h3 class="stat-label">Today's Expenses</h3>
                 <div class="stat-value" id="today-total">৳ 0</div>
                 <p id="today-date">Today</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-minus"></i>
+                </div>
+                <h3 class="stat-label">Yesterday's Expenses</h3>
+                <div class="stat-value" id="yesterday-total">৳ 0</div>
+                <p id="yesterday-date">Yesterday</p>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
@@ -311,12 +318,12 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "***",
-            authDomain: "***",
-            projectId: "***",
-            storageBucket: "***",
-            messagingSenderId: "***",
-            appId: "***"
+            apiKey: "AIzaSyBN2UjLeF7HUCrDMqaPQVDK28gSv2ueK1I",
+            authDomain: "expense-tracker-ef86f.firebaseapp.com",
+            projectId: "expense-tracker-ef86f",
+            storageBucket: "expense-tracker-ef86f.firebasestorage.app",
+            messagingSenderId: "672802245839",
+            appId: "1:672802245839:web:0f966c3ec63e400aa23bba"
         };
 
         // Initialize Firebase
@@ -325,12 +332,14 @@
 
         // DOM Elements
         const todayTotalEl = document.getElementById('today-total');
+        const yesterdayTotalEl = document.getElementById('yesterday-total');
         const weekTotalEl = document.getElementById('week-total');
         const monthTotalEl = document.getElementById('month-total');
         const averageDailyEl = document.getElementById('average-daily');
         const thisWeekAvgEl = document.getElementById('this-week-avg');
         const thisMonthAvgEl = document.getElementById('this-month-avg');
         const todayDateEl = document.getElementById('today-date');
+        const yesterdayDateEl = document.getElementById('yesterday-date');
         const weekRangeEl = document.getElementById('week-range');
         const monthRangeEl = document.getElementById('month-range');
         const monthlyList = document.getElementById('monthly-list');
@@ -390,6 +399,11 @@
             const today = new Date();
             const todayStr = formatDate(today);
             
+            // Get yesterday's date
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = formatDate(yesterday);
+            
             // Get current week range (Sunday to Saturday)
             const weekRange = getWeekRange(today);
             const weekStartStr = formatDate(weekRange.start);
@@ -401,6 +415,7 @@
             const monthEndStr = formatDate(monthRange.end);
             
             let todayTotal = 0;
+            let yesterdayTotal = 0;
             let weekTotal = 0;
             let monthTotal = 0;
             let allTimeTotal = 0;
@@ -434,6 +449,11 @@
                             todayTotal += amount;
                         }
                         
+                        // Yesterday's expenses
+                        if (expenseDate === yesterdayStr) {
+                            yesterdayTotal += amount;
+                        }
+                        
                         // This week expenses (Sunday to Saturday)
                         if (expenseDate >= weekStartStr && expenseDate <= weekEndStr) {
                             weekTotal += amount;
@@ -463,11 +483,13 @@
                     
                     // Update UI for current period stats
                     todayTotalEl.textContent = `৳ ${todayTotal.toFixed(2)}`;
+                    yesterdayTotalEl.textContent = `৳ ${yesterdayTotal.toFixed(2)}`;
                     weekTotalEl.textContent = `৳ ${weekTotal.toFixed(2)}`;
                     monthTotalEl.textContent = `৳ ${monthTotal.toFixed(2)}`;
                     
                     // Update date ranges display
                     todayDateEl.textContent = formatDateDisplay(today);
+                    yesterdayDateEl.textContent = formatDateDisplay(yesterday);
                     weekRangeEl.textContent = `${formatDateDisplay(weekRange.start)} to ${formatDateDisplay(weekRange.end)}`;
                     monthRangeEl.textContent = `${formatDateDisplay(monthRange.start)} to ${formatDateDisplay(monthRange.end)}`;
                     
@@ -532,5 +554,4 @@
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-
 </html>

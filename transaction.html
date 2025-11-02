@@ -301,6 +301,96 @@
             font-size: 0.9rem;
         }
 
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--success), #00a085);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 350px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger), #d63031);
+            box-shadow: 0 8px 25px rgba(232, 67, 147, 0.3);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning), #e17055);
+            box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--info), #0984e3);
+            box-shadow: 0 8px 25px rgba(9, 132, 227, 0.3);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -332,6 +422,22 @@
                 display: block;
                 overflow-x: auto;
             }
+
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+
+            .notification.hide {
+                transform: translateY(-100px);
+            }
         }
     </style>
 </head>
@@ -339,7 +445,6 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-exchange-alt"></i> Transaction Manager</h1>
-            <p>Track money transactions with people</p>
         </header>
 
         <div class="nav-buttons">
@@ -477,12 +582,12 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "***",
-            authDomain: "***",
-            projectId: "***",
-            storageBucket: "***",
-            messagingSenderId: "***",
-            appId: "***"
+            apiKey: "AIzaSyBN2UjLeF7HUCrDMqaPQVDK28gSv2ueK1I",
+            authDomain: "expense-tracker-ef86f.firebaseapp.com",
+            projectId: "expense-tracker-ef86f",
+            storageBucket: "expense-tracker-ef86f.firebasestorage.app",
+            messagingSenderId: "672802245839",
+            appId: "1:672802245839:web:0f966c3ec63e400aa23bba"
         };
 
         // Initialize Firebase
@@ -504,6 +609,61 @@
         const searchBtn = document.getElementById('search-btn');
         const resetBtn = document.getElementById('reset-btn');
         const transactionList = document.getElementById('transaction-list');
+
+        // Notification function
+        function showNotification(title, message, type = 'success') {
+            // Remove existing notification if any
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            // Add to body
+            document.body.appendChild(notification);
+
+            // Show notification with animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            // Close button event
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                hideNotification(notification);
+            });
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideNotification(notification);
+            }, 5000);
+        }
+
+        function hideNotification(notification) {
+            notification.classList.remove('show');
+            notification.classList.add('hide');
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 400);
+        }
 
         // Event Listeners
         dateOptions.forEach(option => {
@@ -559,12 +719,32 @@
             return name.split(' ').map(word => word[0]).join('').toUpperCase();
         }
 
+        function addPersonToDropdown(personName) {
+            // Check if the person already exists in the dropdown
+            const existingOptions = Array.from(personSelect.options).map(option => option.value);
+            if (!existingOptions.includes(personName)) {
+                // Add the new person to the dropdown
+                const newOption = document.createElement('option');
+                newOption.value = personName;
+                newOption.textContent = personName;
+                personSelect.insertBefore(newOption, personSelect.options[personSelect.options.length - 1]);
+                
+                // Also add to search dropdown
+                const newSearchOption = document.createElement('option');
+                newSearchOption.value = personName;
+                newSearchOption.textContent = personName;
+                searchPersonSelect.insertBefore(newSearchOption, searchPersonSelect.options[searchPersonSelect.options.length - 1]);
+            }
+        }
+
         function addTransaction() {
             const date = getSelectedDate();
             let person = personSelect.value;
             
             if (person === 'Others' && otherPersonInput.value) {
                 person = otherPersonInput.value;
+                // Add the new person to dropdowns
+                addPersonToDropdown(person);
             }
             
             const transactionType = document.querySelector('input[name="transaction-type"]:checked').value;
@@ -594,11 +774,21 @@
                 loadTransactions();
                 calculatePersonBalances();
                 
-                alert('Transaction added successfully!');
+                // Show success notification
+                showNotification(
+                    'Success!', 
+                    'Transaction added successfully!', 
+                    'success'
+                );
             })
             .catch(error => {
                 console.error('Error adding transaction: ', error);
-                alert('Error adding transaction. Please try again.');
+                // Show error notification
+                showNotification(
+                    'Error!', 
+                    'Failed to add transaction. Please try again.', 
+                    'error'
+                );
             });
         }
 
@@ -651,10 +841,21 @@
                     .then(() => {
                         loadTransactions();
                         calculatePersonBalances();
+                        // Show success notification
+                        showNotification(
+                            'Success!', 
+                            'Transaction deleted successfully!', 
+                            'success'
+                        );
                     })
                     .catch(error => {
                         console.error('Error deleting transaction: ', error);
-                        alert('Error deleting transaction. Please try again.');
+                        // Show error notification
+                        showNotification(
+                            'Error!', 
+                            'Failed to delete transaction. Please try again.', 
+                            'error'
+                        );
                     });
             }
         }
@@ -693,7 +894,15 @@
                 return;
             }
             
-            people.forEach(person => {
+            // Filter out people with zero balance
+            const peopleWithNonZeroBalance = people.filter(person => personBalances[person] !== 0);
+            
+            if (peopleWithNonZeroBalance.length === 0) {
+                personCardsContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">All transactions are settled. No outstanding balances.</p>';
+                return;
+            }
+            
+            peopleWithNonZeroBalance.forEach(person => {
                 const balance = personBalances[person];
                 const card = document.createElement('div');
                 card.className = `person-card ${balance > 0 ? 'positive' : balance < 0 ? 'negative' : 'neutral'}`;
@@ -705,9 +914,6 @@
                     `Settled with ${person}`;
                 
                 card.innerHTML = `
-                    <div class="person-avatar">
-                        ${getPersonInitials(person)}
-                    </div>
                     <div class="person-name">${person}</div>
                     <div class="person-amount ${balance > 0 ? 'positive' : balance < 0 ? 'negative' : ''}">
                         ৳ ${Math.abs(balance).toFixed(2)}
@@ -790,5 +996,4 @@
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-
 </html>

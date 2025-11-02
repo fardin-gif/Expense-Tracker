@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="appicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fexpense_8910710&psig=AOvVaw3vWKlQ_5qw32yQxBoJTlYZ&ust=1762184978794000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCPCGu-Lo05ADFQAAAAAdAAAAABAE" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker - Home</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -220,6 +220,96 @@
             font-size: 0.9rem;
         }
 
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--success), #00a085);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 350px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.hide {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger), #d63031);
+            box-shadow: 0 8px 25px rgba(232, 67, 147, 0.3);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning), #e17055);
+            box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--info), #0984e3);
+            box-shadow: 0 8px 25px rgba(9, 132, 227, 0.3);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -236,6 +326,22 @@
             .nav-card {
                 padding: 20px;
             }
+
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+
+            .notification.hide {
+                transform: translateY(-100px);
+            }
         }
     </style>
 </head>
@@ -243,7 +349,6 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-wallet"></i> Expense Tracker</h1>
-            <p>Track your daily expenses and manage your money better</p>
         </header>
 
         <div class="card">
@@ -313,15 +418,7 @@
             </form>
         </div>
 
-<div class="nav-container">
-            <!-- <a href="index.html" class="nav-card">
-                <div class="nav-icon">
-                    <i class="fas fa-plus-circle"></i>
-                </div>
-                <div class="nav-title">Add Expense</div>
-                <div class="nav-description">Add new daily expenses</div>
-            </a> -->
-            
+        <div class="nav-container">
             <a href="stats.html" class="nav-card">
                 <div class="nav-icon">
                     <i class="fas fa-chart-bar"></i>
@@ -346,20 +443,17 @@
                 <div class="nav-description">Manage money transactions</div>
             </a>
         </div>
-
     </div>
-
-    
 
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "***",
-            authDomain: "***",
-            projectId: "***",
-            storageBucket: "***",
-            messagingSenderId: "***",
-            appId: "***"
+            apiKey: "AIzaSyBN2UjLeF7HUCrDMqaPQVDK28gSv2ueK1I",
+            authDomain: "expense-tracker-ef86f.firebaseapp.com",
+            projectId: "expense-tracker-ef86f",
+            storageBucket: "expense-tracker-ef86f.firebasestorage.app",
+            messagingSenderId: "672802245839",
+            appId: "1:672802245839:web:0f966c3ec63e400aa23bba"
         };
 
         // Initialize Firebase
@@ -386,6 +480,61 @@
         const monthlyNeedOptions = [
             "Rent", "Electricity Bill", "Internet Bill"
         ];
+
+        // Notification function
+        function showNotification(title, message, type = 'success') {
+            // Remove existing notification if any
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            // Add to body
+            document.body.appendChild(notification);
+
+            // Show notification with animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            // Close button event
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', () => {
+                hideNotification(notification);
+            });
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideNotification(notification);
+            }, 5000);
+        }
+
+        function hideNotification(notification) {
+            notification.classList.remove('show');
+            notification.classList.add('hide');
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 400);
+        }
 
         // Populate dropdowns
         function populateDropdowns() {
@@ -484,11 +633,21 @@
                 dailyNeedContainer.classList.add('hidden');
                 monthlyNeedContainer.classList.add('hidden');
                 
-                alert('Expense added successfully!');
+                // Show success notification
+                showNotification(
+                    'Success!', 
+                    'Expense added successfully!', 
+                    'success'
+                );
             })
             .catch(error => {
                 console.error('Error adding expense: ', error);
-                alert('Error adding expense. Please try again.');
+                // Show error notification
+                showNotification(
+                    'Error!', 
+                    'Failed to add expense. Please try again.', 
+                    'error'
+                );
             });
         }
 
@@ -504,5 +663,4 @@
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-
 </html>
